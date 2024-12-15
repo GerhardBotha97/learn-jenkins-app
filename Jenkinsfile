@@ -11,6 +11,7 @@ pipeline {
             }
         
             steps {
+                cleanWs()
                 echo 'INIT BUILD...'
                 sh '''
                     node --version
