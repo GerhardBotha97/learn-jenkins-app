@@ -82,32 +82,33 @@ pipeline {
             }
         }
 
-        stage('Deploy STAGING') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-        
-            steps {
-                echo 'DEPLOYING TO STAGING...'
-                sh '''
-                    npm install netlify-cli node-jq
-                    node_modules/.bin/netlify --version
-                    echo "Delploying to test SITE ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --json > staging.json
-                    node_modules/.bin/node-jq -r '.deploy_url' staging.json
-                '''
+        /*
+         stage('Deploy STAGING') {
+             agent {
+                 docker {
+                     image 'node:18-alpine'
+                     reuseNode true
+                 }
+             }
 
-                script {
-                    env.STAGE_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' staging.json", returnStdout: true)
-                }
-            }
-        }
+             steps {
+                 echo 'DEPLOYING TO STAGING...'
+                 sh '''
+                     npm install netlify-cli node-jq
+                     node_modules/.bin/netlify --version
+                     echo "Delploying to test SITE ID: $NETLIFY_SITE_ID"
+                     node_modules/.bin/netlify status
+                     node_modules/.bin/netlify deploy --dir=build --json > staging.json
+                     node_modules/.bin/node-jq -r '.deploy_url' staging.json
+                 ''
+                 script {
+                     env.STAGE_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' staging.json", returnStdout: true)
+                 }
+             }
+         }
+        */
 
-        stage('Staging E2E') {
+        stage('DEPLOY STAGING') {
             agent {
                 docker {
                     image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
@@ -116,12 +117,18 @@ pipeline {
             }
             
             environment {
-                CI_ENVIRONMENT_URL = "${env.STAGE_URL}"
+                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE_SET'
             }
             
             steps {
                 echo 'RUN TEST - STAGING...'
                 sh '''
+                    npm install netlify-cli node-jq
+                    node_modules/.bin/netlify --version
+                    echo "Delploying to test SITE ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --json > staging.json
+                    CI_ENVIRONMENT_URL = $(node_modules/.bin/node-jq -r '.deploy_url' staging.json)
                     npx playwright test --reporter=html
                 '''
                 echo 'STAGING E2E Completed'
