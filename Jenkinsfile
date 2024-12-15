@@ -24,6 +24,7 @@ pipeline {
                     npm run build
                     ls -la
                 '''
+                echo "BUILD DONE..."
             }
         }
 
