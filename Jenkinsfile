@@ -129,6 +129,7 @@ pipeline {
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --json > staging.json
                     CI_ENVIRONMENT_URL = $(node_modules/.bin/node-jq -r '.deploy_url' staging.json)
+                    sleep 30
                     npx playwright test --reporter=html
                 '''
                 echo 'STAGING E2E Completed'
