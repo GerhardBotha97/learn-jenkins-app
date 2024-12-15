@@ -125,22 +125,24 @@ pipeline {
                 sh '''
                     npm install netlify-cli node-jq
                     node_modules/.bin/netlify --version
-                    echo "Delploying to test SITE ID: $NETLIFY_SITE_ID"
+                    echo "Deploying to test SITE ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --json > staging.json
-                    CI_ENVIRONMENT_URL =$(node_modules/.bin/node-jq -r '.deploy_url' staging.json)
+                    export CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' staging.json)
+                    echo "CI_ENVIRONMENT_URL: $CI_ENVIRONMENT_URL"
                     sleep 30
                     npx playwright test --reporter=html
                 '''
                 echo 'STAGING E2E Completed'
-            }
-
+                  }
+        
             post {
                 always {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E STAGING', reportTitles: '', useWrapperFileDirectly: true])
                 }
             } 
         }
+
 
         stage('Approval') {
             steps {
