@@ -100,7 +100,7 @@ pipeline {
                     node_modules/.bin/netlify deploy --dir=build --json > staging.json
                     node_modules/.bin/node-jq -r '.deploy_url' staging.json
                 '''
-                
+
                 script {
                     env.STAGE_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' staging.json", returnStdout: true)
                 }
@@ -142,27 +142,29 @@ pipeline {
             }
         }
 
-        stage('Deploy PRODUCTION') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-        
-            steps {
-                echo 'DEPLOYING TO PRODUCTION...'
-                sh '''
-                    npm install netlify-cli
-                    node_modules/.bin/netlify --version
-                    echo "Delploying to test SITE ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod
-                '''
-            }
-        }
+        /* 
+         stage('Deploy PRODUCTION') {
+             agent {
+                 docker {
+                     image 'node:18-alpine'
+                     reuseNode true
+                 }
+             }
 
-        stage('Prod E2E') {
+             steps {
+                 echo 'DEPLOYING TO PRODUCTION...'
+                 sh '''
+                     npm install netlify-cli
+                     node_modules/.bin/netlify --version
+                     echo "Delploying to test SITE ID: $NETLIFY_SITE_ID"
+                     node_modules/.bin/netlify status
+                     node_modules/.bin/netlify deploy --dir=build --prod
+                 '''
+             }
+         }
+        */
+
+        stage('DEPLOY PROD') {
             agent {
                 docker {
                     image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
@@ -175,11 +177,19 @@ pipeline {
             }
             
             steps {
-                echo 'RUN TEST...'
+                echo 'RUN DEPLOY STAGE...'
                 sh '''
+                    node --version
+                    npm --version
+                    npm install netlify-cli
+                    node_modules/.bin/netlify --version
+                    echo "Delploying to test SITE ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --prod
+                    sleep 30
                     npx playwright test --reporter=html
                 '''
-                echo 'PROD E2E Completed'
+                echo 'DEPLOY PROD Completed'
             }
 
             post {
