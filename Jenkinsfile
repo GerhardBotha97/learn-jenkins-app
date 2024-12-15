@@ -119,6 +119,7 @@ pipeline {
                 sh '''
                     npx playwright test --reporter=html
                 '''
+                echo 'PROD E2E Completed'
             }
 
             post {
