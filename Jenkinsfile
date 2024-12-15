@@ -4,6 +4,7 @@ pipeline {
     environment {
         NETLIFY_SITE_ID = '5ad08bd9-02fe-4ef0-b55a-cb6630ea5b20'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        REACT_APP_VERSION = '1.2.3'
     }
 
     stages {
@@ -115,11 +116,11 @@ pipeline {
                     reuseNode true
                 }
             }
-            
+
             environment {
                 CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE_SET'
             }
-            
+
             steps {
                 echo 'RUN TEST - STAGING...'
                 sh '''
@@ -135,7 +136,7 @@ pipeline {
                 '''
                 echo 'STAGING E2E Completed'
                   }
-        
+
             post {
                 always {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E STAGING', reportTitles: '', useWrapperFileDirectly: true])
