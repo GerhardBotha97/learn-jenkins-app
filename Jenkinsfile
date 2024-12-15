@@ -87,8 +87,8 @@ pipeline {
             steps {
                 echo 'DEPLOYING...'
                 sh '''
-                    npm install netlify-cli --save-dev
-                    netlify-cli --version
+                    npm install netlify-cli
+                    netlify --version
                 '''
             }
         }
