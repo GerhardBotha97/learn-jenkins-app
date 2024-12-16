@@ -29,7 +29,7 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Run Tests Local') {
             parallel {
                 stage('Test') {
                 
