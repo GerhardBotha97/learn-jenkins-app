@@ -25,7 +25,7 @@ pipeline {
                         echo "This is a test" > test.txt
                         aws --version
                         aws s3 ls
-                        aws s3 cp test.txt s3://$AWS_S3_BUCKET/jenkins-test.txt
+                        aws s3 cp test.txt s3://$AWS_S3_BUCKET/index.html
                         aws s3 ls s3://$AWS_S3_BUCKET
                     '''
                 }
