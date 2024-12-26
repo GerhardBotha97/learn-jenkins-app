@@ -9,29 +9,7 @@ pipeline {
     }
 
     stages {
-
-        stage('AWS') {
-            agent {
-                docker {
-                    image 'amazon/aws-cli'
-                    args "--entrypoint=''"
-                    reuseNode true
-                }
-            }
-
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'aws-s3', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
-                    sh '''
-                        echo "This is a test" > test.txt
-                        aws --version
-                        aws s3 ls
-                        aws s3 cp test.txt s3://$AWS_S3_BUCKET/index.html
-                        aws s3 ls s3://$AWS_S3_BUCKET
-                    '''
-                }
-            }
-        }
-        
+   
         stage('Build') {
             agent {
                 docker {
@@ -50,6 +28,26 @@ pipeline {
                     ls -la
                 '''
                 echo "BUILD DONE..."
+            }
+        }
+
+        stage('AWS') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli'
+                    args "--entrypoint=''"
+                    reuseNode true
+                }
+            }
+
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'aws-s3', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        aws --version
+                        aws s3 ls
+                        aws s3 sync build s3://$AWS_S3_BUCKET
+                    '''
+                }
             }
         }
 
