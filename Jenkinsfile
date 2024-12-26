@@ -25,10 +25,10 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'aws-s3', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        yum install jq -y
-                        AWS_ECS_REV=$(aws ecs register-task-definition --cli-input-json file://aws/jenkins-taskdef-prod.json | jq -r '.taskDefinition.revision')
+                        AWS_ECS_REV=$(aws ecs register-task-definition --cli-input-json file://aws/jenkins-taskdef-prod.json --query 'taskDefinition.revision' --output text)
                         aws ecs update-service --cluster learnjenkins-cluster-prod --service Jenkins-Service-Prod --task-definition Jenkins-TaskDefinition-Prod:${AWS_ECS_REV}
                     '''
+
                 }
             }
         }
