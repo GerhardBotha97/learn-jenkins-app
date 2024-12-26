@@ -29,7 +29,7 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'aws-s3', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        AWS_ECS_REV=$(aws ecs register-task-definition --cli-input-json file://$AWS_ECS_TASKDEF_PATH--query 'taskDefinition.revision' --output text)
+                        AWS_ECS_REV=$(aws ecs register-task-definition --cli-input-json file://$AWS_ECS_TASKDEF_PATH --query 'taskDefinition.revision' --output text)
                         aws ecs update-service --cluster $AWS_ECS_CLUSTER --service $AWS_ECS_SERVICE --task-definition $AWS_ECS_TASKDEF_PROD:${AWS_ECS_REV}
                         aws ecs wait services-stable --cluster $AWS_ECS_CLUSTER --services $AWS_ECS_SERVICE
                     '''
