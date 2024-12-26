@@ -5,6 +5,7 @@ pipeline {
         NETLIFY_SITE_ID = '5ad08bd9-02fe-4ef0-b55a-cb6630ea5b20'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
         REACT_APP_VERSION = "1.0.$BUILD_ID"
+        AWS_S3_BUCKET = 'learn-jenkins-20241226-1505'
     }
 
     stages {
@@ -24,8 +25,8 @@ pipeline {
                         echo "This is a test" > test.txt
                         aws --version
                         aws s3 ls
-                        aws s3 cp test.txt s3://learn-jenkins-20241226-1505/jenkins-test.txt
-                        aws s3 ls s3://learn-jenkins-20241226-1505
+                        aws s3 cp test.txt s3://$AWS_S3_BUCKET/jenkins-test.txt
+                        aws s3 ls s3://$AWS_S3_BUCKET
                     '''
                 }
             }
