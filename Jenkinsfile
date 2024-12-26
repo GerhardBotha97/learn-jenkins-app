@@ -7,6 +7,10 @@ pipeline {
         // AWS_S3_BUCKET = 'learn-jenkins-20241226-1505'
         REACT_APP_VERSION = "1.0.$BUILD_ID"
         AWS_ECS_REV = ''
+        AWS_ECS_CLUSTER = 'learnjenkins-cluster-prod'
+        AWS_ECS_SERVICE = 'Jenkins-Service-Prod'
+        AWS_ECS_TASKDEF_PATH = 'aws/jenkins-taskdef-prod.json'
+        AWS_ECS_TASKDEF_PROD = 'Jenkins-TaskDefinition-Prod'
         AWS_DEFAULT_REGION = 'us-east-1'
     }
 
@@ -25,9 +29,9 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'aws-s3', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        AWS_ECS_REV=$(aws ecs register-task-definition --cli-input-json file://aws/jenkins-taskdef-prod.json --query 'taskDefinition.revision' --output text)
-                        aws ecs update-service --cluster learnjenkins-cluster-prod --service Jenkins-Service-Prod --task-definition Jenkins-TaskDefinition-Prod:${AWS_ECS_REV}
-                        aws ecs wait services-stable --cluster learnjenkins-cluster-prod --services Jenkins-Service-Prod
+                        AWS_ECS_REV=$(aws ecs register-task-definition --cli-input-json file://$AWS_ECS_TASKDEF_PATH--query 'taskDefinition.revision' --output text)
+                        aws ecs update-service --cluster $AWS_ECS_CLUSTER --service $AWS_ECS_SERVICE --task-definition $AWS_ECS_TASKDEF_PROD:${AWS_ECS_REV}
+                        aws ecs wait services-stable --cluster $AWS_ECS_CLUSTER --services $AWS_ECS_SERVICE
                     '''
 
                 }
