@@ -4,9 +4,9 @@ pipeline {
     environment {
         // NETLIFY_SITE_ID = '5ad08bd9-02fe-4ef0-b55a-cb6630ea5b20'
         // NETLIFY_AUTH_TOKEN = credentials('netlify-token')
-        REACT_APP_VERSION = "1.0.$BUILD_ID"
         // AWS_S3_BUCKET = 'learn-jenkins-20241226-1505'
-        // AWS_ECS_ID = ''
+        REACT_APP_VERSION = "1.0.$BUILD_ID"
+        AWS_ECS_REV = ''
         AWS_DEFAULT_REGION = 'us-east-1'
     }
 
@@ -25,8 +25,9 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'aws-s3', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
                     sh '''
                         aws --version
-                        aws ecs register-task-definition --cli-input-json file://aws/jenkins-taskdef-prod.json
-                        aws ecs update-service --cluster learnjenkins-cluster-prod --service Jenkins-Service-Prod --task-definition Jenkins-TaskDefinition-Prod:2
+                        yum install jq -y
+                        AWS_ECS_REV=$(aws ecs register-task-definition --cli-input-json file://aws/jenkins-taskdef-prod.json | jq -r '.taskDefinition.revision')
+                        aws ecs update-service --cluster learnjenkins-cluster-prod --service Jenkins-Service-Prod --task-definition Jenkins-TaskDefinition-Prod:${AWS_ECS_REV}
                     '''
                 }
             }
