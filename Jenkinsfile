@@ -19,7 +19,7 @@ pipeline {
 
             steps {
                 sh '''
-                    aws help
+                    aws --version
                 '''
             }
         }
