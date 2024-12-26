@@ -27,6 +27,7 @@ pipeline {
                         aws --version
                         AWS_ECS_REV=$(aws ecs register-task-definition --cli-input-json file://aws/jenkins-taskdef-prod.json --query 'taskDefinition.revision' --output text)
                         aws ecs update-service --cluster learnjenkins-cluster-prod --service Jenkins-Service-Prod --task-definition Jenkins-TaskDefinition-Prod:${AWS_ECS_REV}
+                        aws ecs wait services-stable --cluster learnjenkins-cluster-prod --services Jenkins-Service-Prod
                     '''
 
                 }
