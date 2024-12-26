@@ -6,13 +6,15 @@ pipeline {
         // NETLIFY_AUTH_TOKEN = credentials('netlify-token')
         // AWS_S3_BUCKET = 'learn-jenkins-20241226-1505'
         REACT_APP_VERSION = "1.0.$BUILD_ID"
+        AWS_DEFAULT_REGION = 'us-east-1'
         APP_NAME = 'learnjenkinsapp'
+        AWS_ECR_REPO_ID = '701432201591.dkr.ecr.us-east-1.amazonaws.com'
         AWS_ECS_REV = ''
         AWS_ECS_CLUSTER = 'learnjenkins-cluster-prod'
         AWS_ECS_SERVICE = 'Jenkins-Service-Prod'
         AWS_ECS_TASKDEF_PATH = 'aws/jenkins-taskdef-prod.json'
         AWS_ECS_TASKDEF_PROD = 'Jenkins-TaskDefinition-Prod'
-        AWS_DEFAULT_REGION = 'us-east-1'
+
     }
 
     stages {
@@ -49,9 +51,13 @@ pipeline {
             }
 
             steps {
-                sh '''
-                    docker build -t $APP_NAME:$REACT_APP_VERSION .
-                '''
+                withCredentials([usernamePassword(credentialsId: 'aws-s3', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                    sh '''
+                        docker build -t $AWS_ECR_REPO_ID/$APP_NAME:$REACT_APP_VERSION .
+                        aws ecr get-login-password | docker login --username AWS --password-stdin $AWS_ECR_REPO_ID
+                        docker push $AWS_ECR_REPO_ID/$APP_NAME:$REACT_APP_VERSION
+                    '''
+                }
             }
         }
 
